@@ -16,8 +16,15 @@ A modern, themeable, and user-friendly system monitoring dashboard built with Py
 ---
 
 ## 📸 Screenshots
+ **From this to** 
+> ![Screenshot 2025-05-17 120328](https://github.com/user-attachments/assets/b16195be-ae8e-460d-8341-df2de54ac4cd)
 
-> *(Add screenshots here!)*
+---
+
+ **THIS!!! AND GETTING BETTER**
+> ![image](https://github.com/user-attachments/assets/372a1872-edef-4bb8-b970-d9a17e448629)
+
+
 
 ---
 
@@ -68,6 +75,4 @@ pip install psutil matplotlib
 
 ---
 
-## 📄 License
-
-MIT License (or your preferred license) 
+## 🔜 MUCH MORE COMING SOON 🔜 
