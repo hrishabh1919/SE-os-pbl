@@ -19,21 +19,21 @@ class SystemMonitorApp:
         self.root = root
         self.root.title("System Monitor")
         self.root.geometry("1000x800")
-        
+
         # Theme configuration
         self.is_dark_theme = True
         self.themes = {
             'dark': {
-            'bg': '#221e2f',        # Deep navy blue for background
-            'fg': '#e0e0e0',        # Soft light grey for text
-            'frame_bg': '#181821 ',  # Slightly lighter panel/frame background
-            'accent': '#8ab4f8'     # Soft blue accent (like in modern dark UIs)
+                'bg': '#221e2f',
+                'fg': '#e0e0e0',
+                'frame_bg': '#181821 ',
+                'accent': '#8ab4f8'
             },
             'light': {
-            'bg': '#f5f7fa',        # Clean off-white with a blue tint
-            'fg': '#2e2e2e',        # Dark charcoal for text
-            'frame_bg': '#ffffff',  # Pure white frame for clarity
-            'accent': '#1a73e8'     # Bright modern blue for accents
+                'bg': '#f5f7fa',
+                'fg': '#2e2e2e',
+                'frame_bg': '#ffffff',
+                'accent': '#1a73e8'
             }
         }
 
@@ -57,12 +57,21 @@ class SystemMonitorApp:
 
         self.setup_ui()
         self.update_data()
-        self.root.after(8000, self.cleanup_old_data)
+        self.root.after(6000, self.cleanup_old_data)
 
     def setup_ui(self):
+        # Set global font for ttk widgets
         style = ttk.Style()
         style.theme_use("clam")
         self.update_theme()
+        # Set Treeview font size
+        style.configure("Treeview", font=("Segoe UI", 14))
+        style.configure("Treeview.Heading", font=("Segoe UI", 15, "bold"))
+        # Set ttk Label font globally
+        style.configure("TLabel", font=("Segoe UI", 13))
+        style.configure("TButton", font=("Segoe UI", 13))
+        style.configure("TEntry", font=("Segoe UI", 13))
+        style.configure("TMenubutton", font=("Segoe UI", 13))
 
         main_frame = ttk.Frame(self.root, padding="12 12 12 12")
         main_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=10)
@@ -79,20 +88,16 @@ class SystemMonitorApp:
         )
         self.theme_btn.pack(side=tk.LEFT, padx=5)
 
-
-
         # Search frame
         search_frame = ttk.Frame(controls_frame)
         search_frame.pack(side=tk.RIGHT, padx=10, pady=5, anchor='ne')
-    
-        # Place "(Search Bar)" to the LEFT of the search entry
-        search_label = ttk.Label(search_frame, text="(Search Bar)", font=("Segoe UI", 8, "italic"), foreground="gray")
-        search_label.pack(side=tk.LEFT, padx=(0, 5))
 
         ttk.Label(search_frame, text="Search:").pack(side=tk.LEFT)
-        self.search_entry = ttk.Entry(search_frame, textvariable=self.search_var, width=20)
+        self.search_entry = ttk.Entry(search_frame, textvariable=self.search_var, width=20, font=("Segoe UI", 13))
         self.search_entry.pack(side=tk.LEFT)
-
+    
+        # Bind search_var to filter_processes
+        self.search_var.trace_add('write', self.filter_processes)
 
 
         # Info frame
@@ -137,17 +142,16 @@ class SystemMonitorApp:
             show="headings",
             height=10
         )
-        
+
         for col in ("PID", "Name", "CPU", "Memory"):
             self.process_tree.heading(col, text=col, command=lambda c=col: self.sort_processes(c))
             self.process_tree.column(col, anchor=tk.CENTER)
-
         self.process_tree.pack(fill=tk.BOTH, expand=True, pady=10)
-        
+
         # Add right-click menu
-        self.context_menu = tk.Menu(self.root, tearoff=0)
-        self.context_menu.add_command(label="Show Details", command=self.show_process_details)
-        self.context_menu.add_command(label="Terminate Process", command=self.terminate_process)
+        self.context_menu = tk.Menu(self.root, tearoff=0, font=("Segoe UI", 13))
+        self.context_menu.add_command(label="Show Details", command=self.show_process_details, font=("Segoe UI", 13))
+        self.context_menu.add_command(label="Terminate Process", command=self.terminate_process, font=("Segoe UI", 13))
         self.process_tree.bind("<Button-3>", self.show_context_menu)
 
         # Buttons frame
@@ -179,17 +183,35 @@ class SystemMonitorApp:
         style.configure(
             "TLabel",
             background=self.current_theme['frame_bg'],
-            foreground=self.current_theme['fg']
+            foreground=self.current_theme['fg'],
+            font=("Segoe UI", 13)
         )
         style.configure(
             "Treeview",
             background=self.current_theme['bg'],
             foreground=self.current_theme['fg'],
-            fieldbackground=self.current_theme['bg']
+            fieldbackground=self.current_theme['bg'],
+            font=("Segoe UI", 14)
+        )
+        style.configure(
+            "Treeview.Heading",
+            font=("Segoe UI", 15, "bold")
         )
         style.map(
             'Treeview',
             background=[('selected', self.current_theme['accent'])]
+        )
+        style.configure(
+            "TButton",
+            font=("Segoe UI", 13)
+        )
+        style.configure(
+            "TEntry",
+            font=("Segoe UI", 13)
+        )
+        style.configure(
+            "TMenubutton",
+            font=("Segoe UI", 13)
         )
 
     def toggle_theme(self):
@@ -210,28 +232,52 @@ class SystemMonitorApp:
     def show_process_details(self):
         selected_item = self.process_tree.focus()
         if not selected_item:
-            messagebox.showwarning("No selection", "Please select a process to view details.")
+            messagebox.showwarning("No selection", "Please select a process to view details.", icon='warning', parent=self.root)
             return
 
         values = self.process_tree.item(selected_item, 'values')
         pid = int(values[0])
-        
+
         try:
             proc = psutil.Process(pid)
-            details = f"""
-            Process Details:
-            PID: {pid}
-            Name: {proc.name()}
-            Status: {proc.status()}
-            CPU Percent: {proc.cpu_percent()}%
-            Memory Percent: {proc.memory_percent():.1f}%
-            Create Time: {datetime.fromtimestamp(proc.create_time()).strftime('%Y-%m-%d %H:%M:%S')}
-            Threads: {proc.num_threads()}
-            """
-            messagebox.showinfo("Process Details", details)
+            details = (
+                f"Process Details:\n"
+                f"PID: {pid}\n"
+                f"Name: {proc.name()}\n"
+                f"Status: {proc.status()}\n"
+                f"CPU Percent: {proc.cpu_percent()}%\n"
+                f"Memory Percent: {proc.memory_percent():.1f}%\n"
+                f"Create Time: {datetime.fromtimestamp(proc.create_time()).strftime('%Y-%m-%d %H:%M:%S')}\n"
+                f"Threads: {proc.num_threads()}\n"
+            )
+            # Custom dialog for larger font
+            self.show_custom_dialog("Process Details", details)
         except Exception as e:
             logging.error(f"Error showing process details: {str(e)}")
-            messagebox.showerror("Error", f"Failed to get process details.\n{str(e)}")
+            messagebox.showerror("Error", f"Failed to get process details.\n{str(e)}", parent=self.root)
+
+    def show_custom_dialog(self, title, message):
+        dialog = tk.Toplevel(self.root)
+        dialog.title(title)
+        dialog.grab_set()
+        dialog.transient(self.root)
+        dialog.resizable(False, False)
+        dialog.configure(bg=self.current_theme['bg'])
+
+        label = tk.Label(dialog, text=message, font=("Segoe UI", 14), bg=self.current_theme['bg'], fg=self.current_theme['fg'], justify="left", anchor="w")
+        label.pack(padx=30, pady=20)
+
+        button = tk.Button(dialog, text="OK", font=("Segoe UI", 14), command=dialog.destroy)
+        button.pack(pady=(0, 20))
+
+        dialog.update_idletasks()
+        w = dialog.winfo_reqwidth()
+        h = dialog.winfo_reqheight()
+        ws = dialog.winfo_screenwidth()
+        hs = dialog.winfo_screenheight()
+        x = (ws // 2) - (w // 2)
+        y = (hs // 2) - (h // 2)
+        dialog.geometry(f'{w}x{h}+{x}+{y}')
 
     def sort_processes(self, column):
         items = [(self.process_tree.set(k, column), k) for k in self.process_tree.get_children('')]
@@ -265,7 +311,6 @@ class SystemMonitorApp:
             memory_usage = psutil.virtual_memory().percent
             disk_usage = psutil.disk_usage('/').percent
             current_net_io = psutil.net_io_counters()
-            
             sent_speed = (current_net_io.bytes_sent - self.last_net_io.bytes_sent) / (1024 * 1024)
             recv_speed = (current_net_io.bytes_recv - self.last_net_io.bytes_recv) / (1024 * 1024)
             self.last_net_io = current_net_io
@@ -302,31 +347,31 @@ class SystemMonitorApp:
                 self.network_received_speed.pop(0)
         except Exception as e:
             logging.error(f"Error cleaning up data: {str(e)}")
-        
-        self.root.after(8000, self.cleanup_old_data)
+
+        self.root.after(6000, self.cleanup_old_data)
 
     def update_graphs(self, *_):
         try:
             self.ax.clear()
             selected = self.graph_option.get()
-    
+
             # Limit data to last 60 points for better readability
             max_points = 60
             time_labels = self.timestamps[-max_points:]
-    
+
             # Downsample x-axis labels
-            show_every = max(1, len(time_labels) // 6)  # Show ~6 labels
+            show_every = max(1, len(time_labels) // 6)
             x_ticks = range(0, len(time_labels), show_every)
             x_labels = [time_labels[i] for i in x_ticks]
 
             # Set theme colors
             bg_color = '#2c3e50' if self.is_dark_theme else '#ffffff'
             fg_color = 'white' if self.is_dark_theme else 'black'
-    
+
             # Configure plot appearance
             self.fig.patch.set_facecolor(bg_color)
             self.ax.set_facecolor(bg_color)
-            self.ax.tick_params(axis='both', colors=fg_color, labelsize=8)
+            self.ax.tick_params(axis='both', colors=fg_color, labelsize=10)
             self.ax.title.set_color(fg_color)
             self.ax.grid(True, linestyle=':', alpha=0.3, color=fg_color)
 
@@ -342,9 +387,9 @@ class SystemMonitorApp:
                 self.ax.plot(self.network_received_speed[-max_points:], label="Received (MB/s)", color='blue', linewidth=2)
 
             self.ax.set_xticks(x_ticks)
-            self.ax.set_xticklabels(x_labels, rotation=45)
+            self.ax.set_xticklabels(x_labels)
             self.ax.set_title(selected)
-            self.ax.legend(loc='upper left', fontsize=8)
+            self.ax.legend(loc='upper left', fontsize=12)
             self.fig.tight_layout()
             self.canvas.draw()
 
@@ -352,10 +397,15 @@ class SystemMonitorApp:
             logging.error(f"Error updating graphs: {str(e)}")
             self.update_status(f"Error updating graphs: {str(e)}")
 
-
-
     def update_process_list(self):
         try:
+            # Remember the currently selected PID
+            selected_item = self.process_tree.focus()
+            selected_pid = None
+            if selected_item:
+                selected_pid = self.process_tree.item(selected_item, 'values')[0]
+
+            # Clear the tree
             for item in self.process_tree.get_children():
                 self.process_tree.delete(item)
 
@@ -368,13 +418,22 @@ class SystemMonitorApp:
 
             top = sorted(processes, key=lambda x: x['cpu_percent'], reverse=True)[:10]
 
+            # Insert processes and keep track of the new item id for the previously selected PID
+            new_selected_item = None
             for proc in top:
-                self.process_tree.insert("", tk.END, values=(
+                item_id = self.process_tree.insert("", tk.END, values=(
                     proc['pid'],
                     proc['name'][:20],
                     f"{proc['cpu_percent']:.1f}",
                     f"{proc['memory_percent']:.1f}"
                 ))
+                if selected_pid and str(proc['pid']) == str(selected_pid):
+                    new_selected_item = item_id
+
+            # Restore selection if possible
+            if new_selected_item:
+                self.process_tree.selection_set(new_selected_item)
+                self.process_tree.focus(new_selected_item)
 
         except Exception as e:
             logging.error(f"Error updating process list: {str(e)}")
@@ -383,23 +442,22 @@ class SystemMonitorApp:
     def terminate_process(self):
         selected_item = self.process_tree.focus()
         if not selected_item:
-            messagebox.showwarning("No selection", "Please select a process to terminate.")
+            messagebox.showwarning("No selection", "Please select a process to terminate.", icon='warning', parent=self.root)
             return
-
         values = self.process_tree.item(selected_item, 'values')
         pid = int(values[0])
-        
+
         try:
             proc = psutil.Process(pid)
-            if messagebox.askyesno("Confirm", f"Are you sure you want to terminate process {pid} ({proc.name()})?"):
+            if messagebox.askyesno("Confirm", f"Are you sure you want to terminate process {pid} ({proc.name()})?", parent=self.root):
                 proc.terminate()
                 proc.wait(timeout=3)
                 logging.info(f"Process {pid} terminated successfully")
-                messagebox.showinfo("Success", f"Process {pid} terminated successfully.")
+                messagebox.showinfo("Success", f"Process {pid} terminated successfully.", parent=self.root)
                 self.update_status(f"Process {pid} terminated")
         except Exception as e:
             logging.error(f"Error terminating process {pid}: {str(e)}")
-            messagebox.showerror("Error", f"Failed to terminate process {pid}.\n{str(e)}")
+            messagebox.showerror("Error", f"Failed to terminate process {pid}.\n{str(e)}", parent=self.root)
 
 if __name__ == "__main__":
     try:
@@ -408,4 +466,4 @@ if __name__ == "__main__":
         root.mainloop()
     except Exception as e:
         logging.critical(f"Application crashed: {str(e)}")
-        messagebox.showerror("Fatal Error", f"The application has crashed.\n{str(e)}") 
+        messagebox.showerror("Fatal Error", f"The application has crashed.\n{str(e)}")
