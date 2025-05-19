@@ -26,7 +26,7 @@ class SystemMonitorApp:
             'dark': {
                 'bg': '#221e2f',
                 'fg': '#e0e0e0',
-                'frame_bg': '#181821 ',
+                'frame_bg': '#181821',
                 'accent': '#8ab4f8'
             },
             'light': {
