@@ -8235,3 +8235,6 @@
 2025-05-17 19:24:41,914 - INFO - Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
 2025-05-17 19:35:21,946 - INFO - Process 21828 terminated successfully
 2025-05-18 18:56:03,802 - CRITICAL - Application crashed: 'SystemMonitorApp' object has no attribute 'cpu_label'
+2025-05-22 16:41:21,716 - CRITICAL - Application crashed: 'SystemMonitorApp' object has no attribute 'update_widget_data'
+2025-05-22 16:44:24,153 - CRITICAL - Application crashed: 'SystemMonitorApp' object has no attribute 'update_widget_data'
+2025-05-22 17:00:42,462 - CRITICAL - Application crashed: 'SystemMonitorApp' object has no attribute 'toggle_widget_mode'
