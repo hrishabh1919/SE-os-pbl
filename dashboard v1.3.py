@@ -111,7 +111,6 @@ class SystemMonitorApp:
         # Bind search_var to filter_processes
         self.search_var.trace_add('write', self.filter_processes)
 
-
         # Info frame
         info_frame = ttk.Frame(main_frame)
         info_frame.pack(fill=tk.X)

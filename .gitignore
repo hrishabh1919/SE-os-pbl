@@ -1,0 +1,16 @@
+# Log files
+system_monitor.log
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# Environment
+.env
+.env.txt 
