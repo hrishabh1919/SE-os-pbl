@@ -12,6 +12,7 @@ A modern, themeable, and user-friendly system monitoring dashboard built with Py
 - **Pause-While-Selecting:** Process list pauses when you select a process, so you can safely terminate it.
 - **Error Handling:** User-friendly error messages and logging.
 - **Responsive UI:** Clean, modern layout with status bar and context menus.
+- **Multiple Versions:** Support for both v1.3 and v1.4 with improved features and stability.
 
 ---
 
@@ -24,8 +25,6 @@ A modern, themeable, and user-friendly system monitoring dashboard built with Py
  **THIS!!! AND GETTING BETTER**
 > ![image](https://github.com/user-attachments/assets/372a1872-edef-4bb8-b970-d9a17e448629)
 
-
-
 ---
 
 ## 🛠️ Requirements
@@ -37,7 +36,7 @@ A modern, themeable, and user-friendly system monitoring dashboard built with Py
 
 Install dependencies:
 ```bash
-pip install psutil matplotlib
+pip install -r requirements.txt
 ```
 
 ---
@@ -54,14 +53,21 @@ pip install psutil matplotlib
     ```
 3. Run the application:
     ```bash
-    python improved_monitor.py
+    # For version 1.4 (Latest)
+    python ver14.py
+    
+    # For version 1.3
+    python dashboard\ v1.3.py
     ```
 
 ---
 
 ## 📁 File Structure
 
-- `improved_monitor.py` — Main application script.
+- `ver14.py` — Latest version (v1.4) of the application.
+- `dashboard v1.3.py` — Previous version of the application.
+- `improved_monitor.py` — Alternative implementation.
+- `widget1.py` — Widget components for the dashboard.
 - `system_monitor.log` — Log file for errors and events.
 - `requirements.txt` — List of dependencies.
 - `README.md` — This file.
@@ -70,8 +76,9 @@ pip install psutil matplotlib
 
 ## 🎨 Customization
 
-- Adjust theme colors in `improved_monitor.py` under the `self.themes` dictionary.
+- Adjust theme colors in the respective Python files under the `self.themes` dictionary.
 - Tweak process list update interval and graph history length in the code.
+- Choose between different versions based on your needs.
 
 ---
 
